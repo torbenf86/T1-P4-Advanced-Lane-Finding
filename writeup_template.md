@@ -18,12 +18,12 @@ The goals / steps of this project are the following:
 
 [image1]: ./output_images/undistortion_chessboard.jpeg "Undistorted"
 [image2]: ./output_images/undistortion.jpeg "Road Transformed"
-[image3]: ./output_images/pipeline.jpeg "Binary Example"
+[image3]: ./output_images/pipeline2.jpeg "Binary Example"
 [image4]: ./output_images/warped.jpeg "Warp Example"
-[image5]: ./output_images/lane_detection.jpeg "Fit Visual"
-[image6]: ./output_images/output.jpeg "Output"
-[image7]: ./output_images/warped_binary.jpeg "Binary Warp Example"
-[video1]: ./output_images/result.mp4 "Video"
+[image5]: ./output_images/lane_detection2.jpeg "Fit Visual"
+[image6]: ./output_images/output2.jpeg "Output"
+[image7]: ./output_images/warped_binary2.jpeg "Binary Warp Example"
+[video1]: ./result.mp4 "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 ###Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
@@ -54,13 +54,15 @@ The result shows a comparison between the orginal and the undistorted image:
 ![alt text][image2]
 
 ####2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
-First, I converted the image to HLS- color space. Then, I used a combination of color (threshold: (150,255)) and gradient thresholds (threshold: (40,100)) to generate a binary image (thresholding steps at lines 50 through 74 in `functions.py`).  Here's an example of my output for this step. 
+First, I converted the image to LAB - color space and LUV color space. Then, I used a combination of color (threshold: (150,255)) and gradient thresholds (threshold: (40,100)) to generate a binary image (thresholding steps at lines 50 through 74 in `functions.py`). 
+I used the B channel in LAB for the color thresholding and the L channel in LUV for the gradient thresholding. 
+Here's an example of my output for this step. 
 
 ![alt text][image3]
 
 ####3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-The code for my perspective transform is inside the function called `perspective_transform()`, which appears in lines 139 through 147 in the file `functions.py`.  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
+The code for my perspective transform is inside the function called `perspective_transform()`, which appears in lines 143 through 151 in the file `functions.py`.  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
 
 
 | Source        | Destination   | 
@@ -85,19 +87,23 @@ The fitted function is plotted in the image below:
 
 ![alt text][image5]
 
-The code can be found in  lines 180-307 in `functions.py`.
+The code can be found in  lines 184-311 in `functions.py`.
 
 ####5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I did this in lines 323 through 349 in my code in the function curvature() in `functions.py`.
+I did this in lines 327 through 353 in my code in the function curvature() in `functions.py`.
 The formula for calculating the curvature is as follows : R = ​∣2A∣​​(1+(2Ay+B)​^2​​)​^(3/2​​​​)
 Finally the radius has to be transformed from pixel space to real world space by using the given constants.
 
+To determine the position of the vehicle with respect to the lane center, I used the identified lane lines and calculated their value at y=0 yielding the position of the lane center
+It can be assumed, that the position of the vehicle is in the middle of the frames, which corresponds to a value of x=640.
+The position is then the absolute value of the difference between the lane center and the middle of the frame, corrected by the conversion factor between pixel and real world space.
+
 ####6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
-I implemented this step in lines 352 through 378 in the function visualize_final() in `functions.py`.  
-The detected lane lines are used to draw a lane in the warped image by using cv2.fillPoly(). The function cv2.putText() is used to add the calculated curvature of the right and left lane line.
-Finally, the warped image is unwarped back to the original image by using the inverted perspective matrix Minv 
+I implemented this step in lines 356 through 382 in the function visualize_final() in `functions.py`.  
+The detected lane lines are used to draw a lane in the warped image by using cv2.fillPoly(). The function cv2.putText() is used to add the calculated curvature of the right and left lane line and the distance of the vehicle to the lane center.
+Finally, the warped image is unwarped back to the original image by using the inverted perspective matrix Minv.
 Here is an example of my result on a test image:
 
 ![alt text][image6]
@@ -115,8 +121,8 @@ Here's a [link to my video result](./result.mp4)
 
 ####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-The algorithm is pretty reliable, but finds its limits, if the captured images are too much shaded. Also, the starting points are identified by using a histogram. 
+The algorithm is pretty reliable, but found its limits, if the captured images are too much shaded when using only th HLS color space. As a consequence I switched to the LAB and LUV color spaces, which treat light changes significantly better. Also, the starting points are identified by using a histogram. 
 This could lead to a false starting point, if other parts than the lane lines are dominant in the image. 
-A plausibility check is in this case necessary (for example if the distance of the lanes is plausible). This check is implemented in line 166 through 177 in `functions.py`, but it does not yet decide, which peak of the histogram is the right one.
+A plausibility check is in this case necessary (for example if the distance of the lanes is plausible). This check is implemented in line 170 through 181 in `functions.py`, but it does not yet decide, which peak of the histogram is the right one.
 
 
