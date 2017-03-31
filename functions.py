@@ -49,11 +49,13 @@ def visualize_distortion(img_original, img_undistort):
 
 def thresh(img, s_thresh, sx_thresh):
     img = np.copy(img)
-    # Convert to HSV color space and separate the V channel
-    hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HLS).astype(np.float)
-    l_channel = hsv[:, :, 1]
-    s_channel = hsv[:, :, 2]
-    # Sobel x
+    # Convert to LAB and LUV color space
+    lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB).astype(np.float)
+    luv = cv2.cvtColor(img, cv2.COLOR_RGB2LUV).astype(np.float)
+    #hls = cv2.cvtColor(img, cv2.COLOR_RGB2HLS).astype(np.float)
+    l_channel = luv[:, :, 0]
+    b_channel = lab[:, :, 2]
+    # Sobel x l channel
     sobelx = cv2.Sobel(l_channel, cv2.CV_64F, 1, 0)  # Take the derivative in x
     abs_sobelx = np.absolute(sobelx)  # Absolute x derivative to accentuate lines away from horizontal
     scaled_sobel = np.uint8(255 * abs_sobelx / np.max(abs_sobelx))
@@ -63,8 +65,10 @@ def thresh(img, s_thresh, sx_thresh):
     sxbinary[(scaled_sobel >= sx_thresh[0]) & (scaled_sobel <= sx_thresh[1])] = 1
 
     # Threshold color channel
-    s_binary = np.zeros_like(s_channel)
-    s_binary[(s_channel >= s_thresh[0]) & (s_channel <= s_thresh[1])] = 1
+    s_binary = np.zeros_like(b_channel)
+    s_binary[(b_channel >= s_thresh[0]) & (b_channel <= s_thresh[1])] = 1
+    #s_binary = np.zeros_like(s_channel)
+    #s_binary[(s_channel >= s_thresh[0]) & (s_channel <= s_thresh[1])] = 1
 
     color_binary = np.dstack((np.zeros_like(sxbinary), sxbinary, s_binary))
 
@@ -346,10 +350,18 @@ def curvature(img, left_fit, right_fit):
     right_curverad = ((1 + (2 * right_fit_cr[0] * y_eval * ym_per_pix + right_fit_cr[1]) ** 2) ** 1.5) / np.absolute(
         2 * right_fit_cr[0])
 
-    return left_curverad, right_curverad
+    # calculate center of lane
+    left_y0 = left_fit[2]
+    right_y0 = right_fit[2]
+    lane_center_px = right_y0 - left_y0
+    distance_to_center_m = np.absolute(lane_center_px-img.shape[1]/2)*xm_per_pix
 
 
-def visualize_final(undist, warped, left_fit, right_fit, M_inv, left_curverad, right_curverad):
+
+    return left_curverad, right_curverad, distance_to_center_m
+
+
+def visualize_final(undist, warped, left_fit, right_fit, M_inv, left_curverad, right_curverad, distance_to_center):
     # Create an image to draw the lines on
     warp_zero = np.zeros_like(warped).astype(np.uint8)
     color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
@@ -372,7 +384,7 @@ def visualize_final(undist, warped, left_fit, right_fit, M_inv, left_curverad, r
     result = cv2.addWeighted(undist, 1, newwarp, 0.3, 0)
     cv2.putText(result, 'Left curvature radius: %.2f m' % left_curverad , (200, 50),cv2.FONT_HERSHEY_SIMPLEX, 1, 255 )
     cv2.putText(result, 'Right curvature radius: %.2f m' % right_curverad, (200, 100),cv2.FONT_HERSHEY_SIMPLEX,1, 255)
-
+    cv2.putText(result, 'Distance to lane center: %.2f m' % distance_to_center, (200, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
     #plt.imshow(result)
     #plt.show()
     return result
@@ -386,3 +398,4 @@ def  visualize_chessboard_distortion(img, mtx, dist):
     ax2.imshow(undist)
     ax2.set_title('Undistorted Image', fontsize=50)
     plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
+

@@ -56,10 +56,10 @@ def pipeline(img):
     #visualize_lanes(binary_warped, left_fit, right_fit)
 
 # Step 6 Determine the lane curvature
-    left_curverad, right_curverad = curvature(img, left_fit, right_fit)
+    left_curverad, right_curverad, distance_to_center = curvature(img, left_fit, right_fit)
 
 # Step 7 Visualization
-    result = visualize_final(undistimg, binary_warped, left_fit, right_fit, M_inv, left_curverad, right_curverad)
+    result = visualize_final(undistimg, binary_warped, left_fit, right_fit, M_inv, left_curverad, right_curverad, distance_to_center)
 
 
     return result
@@ -75,7 +75,7 @@ line_left = Line()
 
 # Standalone
 
-#img = mpimg.imread("test_images/straight_lines1.jpg")
+#img = mpimg.imread("test_images/test5.jpg")
 #result = pipeline(img)
 #plt.imshow(result)
 #plt.show()
