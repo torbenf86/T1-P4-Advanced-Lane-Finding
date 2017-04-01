@@ -339,7 +339,7 @@ def curvature(img, left_fit, right_fit):
 
     # Define conversions in x and y from pixels space to meters
     ym_per_pix = 30 / 720  # meters per pixel in y dimension
-    xm_per_pix = 3.7 / 700  # meters per pixel in x dimension
+    xm_per_pix = 3.7 / 650  # meters per pixel in x dimension
 
     # Fit new polynomials to x,y in world space
     left_fit_cr = np.polyfit(ploty * ym_per_pix, left_fitx * xm_per_pix, 2)
@@ -351,9 +351,9 @@ def curvature(img, left_fit, right_fit):
         2 * right_fit_cr[0])
 
     # calculate center of lane
-    left_y0 = left_fit[2]
-    right_y0 = right_fit[2]
-    lane_center_px = right_y0 - left_y0
+    left_bottom = left_fit[0] * img.shape[0] ** 2 + left_fit[1] * img.shape[0] + left_fit[2]
+    right_bottom = right_fit[0] * img.shape[0] ** 2 + right_fit[1] * img.shape[0] + right_fit[2]
+    lane_center_px = right_bottom - left_bottom
     distance_to_center_m = np.absolute(lane_center_px-img.shape[1]/2)*xm_per_pix
 
 

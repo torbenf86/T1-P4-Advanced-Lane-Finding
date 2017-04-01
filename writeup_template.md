@@ -95,7 +95,7 @@ I did this in lines 327 through 353 in my code in the function curvature() in `f
 The formula for calculating the curvature is as follows : R = ​∣2A∣​​(1+(2Ay+B)​^2​​)​^(3/2​​​​)
 Finally the radius has to be transformed from pixel space to real world space by using the given constants.
 
-To determine the position of the vehicle with respect to the lane center, I used the identified lane lines and calculated their value at y=0 yielding the position of the lane center
+To determine the position of the vehicle with respect to the lane center, I used the identified lane lines and calculated their value at y=y_max yielding the position of the lane center
 It can be assumed, that the position of the vehicle is in the middle of the frames, which corresponds to a value of x=640.
 The position is then the absolute value of the difference between the lane center and the middle of the frame, corrected by the conversion factor between pixel and real world space.
 
