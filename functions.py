@@ -353,9 +353,9 @@ def curvature(img, left_fit, right_fit):
     # calculate center of lane
     left_bottom = left_fit[0] * img.shape[0] ** 2 + left_fit[1] * img.shape[0] + left_fit[2]
     right_bottom = right_fit[0] * img.shape[0] ** 2 + right_fit[1] * img.shape[0] + right_fit[2]
-    lane_center_px = right_bottom - left_bottom
-    distance_to_center_m = np.absolute(lane_center_px-img.shape[1]/2)*xm_per_pix
-
+    lane_size_px = right_bottom - left_bottom
+    lane_center_px = lane_size_px / 2 + left_bottom
+    distance_to_center_m = np.absolute(lane_center_px-img.shape[1]/2)*(3.7 / lane_size_px)
 
 
     return left_curverad, right_curverad, distance_to_center_m
